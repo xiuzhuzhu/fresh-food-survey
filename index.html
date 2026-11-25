@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-KcB3Cwtp/HfEoNo6EIDTLtmTA4GGFBdLOaqSlexrBUs=' 'sha256-Lw6VW39VW7M4wd7yxup4iU7cIHP0I5asupGf0QbpUHk=' 'sha256-05FdDjs3uTrOY88YwyJKZFlSVZX3rm79dqQwKa0pAt4='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://api.bigdatacloud.net/data/reverse-geocode-client; form-action 'none'; base-uri 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-tLqlqt17K1qV4+ohY2O/exLoV4CfkRwZOzMFaHopYMs=' 'sha256-NqLt06UkuPkwX4GQCcv+is74boyuuTmwCMI020IFp+E=' 'sha256-l5IU8mk2ZBpd8jolNgzYPi01L3HyTnVR/9gYIUzsZWI='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://api.bigdatacloud.net/data/reverse-geocode-client; form-action 'none'; base-uri 'none'">
   <meta name="theme-color" content="#214f40">
   <meta name="description" content="生鲜消费与膳食结构研究问卷">
   <title>鲜食研究 · 生鲜消费与膳食结构问卷</title>
@@ -88,7 +88,6 @@
   const version = 'fresh-survey-2026-v11';
   const occupations = ['大学在读（本专科等）','研究生及以上在读','企业员工','机关／政府机构人员','专业人员（教师、律师、医生等）','个体商户／创业','自由职业者','目前无业／待业','离退休人员','其他','不便透露'];
   const personalIncomes = ['3000元以下','3000—4999元','5000—7999元','8000—11999元','12000元及以上','不便回答'];
-  const useIntentions = ['非常不愿意','比较不愿意','一般','比较愿意','非常愿意'];
   const percentOptions = Array.from({length:11}, (_,index) => String(index * 10) + '%');
   const premiumLimits = ['只接受同价或更便宜','最高可贵5%','最高可贵10%','最高可贵15%','最高可贵20%','最高可贵30%','最高可贵50%','最高可贵100%','可接受贵100%以上','不愿意主动购买'];
   const unwillingReasons = ['对有机认证或绿色认证不信任','不知道有机或绿色食品好在哪里','价格太高','口感差','其他'];
@@ -327,7 +326,6 @@
         const detail = s.rankedAnswers?.[id] ?? {};
         const title = nameOf(channels, id);
         if (!percentOptions.includes(detail.maximumShare)) add('maximumShare-' + id, '请选择你愿意分配给' + title + '的最高支出占比。');
-        if (!useIntentions.includes(detail.futureUse)) add('futureUse-' + id, '请选择你未来使用' + title + '的意愿。');
       }
       for (const channel of ranks) {
         const cost = s.costs[channel] ?? {};
@@ -433,7 +431,6 @@
       categories_purchased:[...s.categories], category_spending:categorySpending, category_channel_matrix:matrix,
       ranked_channels:s.rankedChannels.map((channel,index) => ({
         rank:index + 1, channel, maximum_share_percent:parseInt(s.rankedAnswers[channel]?.maximumShare, 10),
-        future_use:s.rankedAnswers[channel]?.futureUse,
       })),
       channel_purchase_frequency:Object.fromEntries(s.channels.map(id => [id, s.frequency[id] ?? null])),
       average_shopping_costs:s.rankedChannels.map(channel => ({
@@ -450,7 +447,7 @@
   }
 
   root.SurveyLogic = {
-    version, occupations, personalIncomes, useIntentions, percentOptions, premiumLimits, unwillingReasons, householdStructures, healthQuestions, channels, categories, monthly, timeBands, feeBands, channelReasons, certificationTypes, premiums, organicReasons,
+    version, occupations, personalIncomes, percentOptions, premiumLimits, unwillingReasons, householdStructures, healthQuestions, channels, categories, monthly, timeBands, feeBands, channelReasons, certificationTypes, premiums, organicReasons,
     spendBands, blank, num, migrateDraft, allocation, allocationSum, validAllocation, shareMin, shareStep, validSliderAllocation, validate, record,
   };
   if (typeof module !== 'undefined') module.exports = root.SurveyLogic;
@@ -528,7 +525,6 @@
       const item = obj(obj(data.rankedAnswers)[id]);
       return {
         maximumShare:choice(item.maximumShare, L.percentOptions),
-        futureUse:choice(item.futureUse, L.useIntentions),
       };
     });
     s.costs = keyed(s.rankedChannels, h => {
@@ -1041,7 +1037,6 @@ function shoppingCosts() {
     </div>
       ${channelReasonFields(id, code+'.3')}
       ${field(code+'.4','你最多愿意把全部生鲜支出的多少放在这个渠道？',path+'.maximumShare',L.percentOptions)}
-      ${field(code+'.5','未来，你愿意继续使用这个渠道购买生鲜食品吗？',path+'.futureUse',L.useIntentions)}
     `, code);
   }).join('');
   return shell(card('过去30天，你最常用哪些渠道购买生鲜食品？',
