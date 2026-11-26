@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-sTEh16dhF1oPNuC99+4ISGpL0xgwrQu4j8BKuwo1G7s=' 'sha256-pCEoJO+MsVRVQ0KKDOp6FzYAophzMpUBKQLSmr+O5QI=' 'sha256-Q0+1M2qeIgk+hd2+N5qnBSEOC6vTozNcVtQAFOV6E40='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://api.bigdatacloud.net/data/reverse-geocode-client; form-action 'none'; base-uri 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-k+Hvw+hjVF0BEkq+iFiT0j7RCI9lr+fI6ozpPIO19C4=' 'sha256-pCEoJO+MsVRVQ0KKDOp6FzYAophzMpUBKQLSmr+O5QI=' 'sha256-Q0+1M2qeIgk+hd2+N5qnBSEOC6vTozNcVtQAFOV6E40='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://api.bigdatacloud.net/data/reverse-geocode-client; form-action 'none'; base-uri 'none'">
   <meta name="theme-color" content="#214f40">
   <meta name="description" content="生鲜消费与膳食结构研究问卷">
   <title>鲜食研究 · 生鲜消费与膳食结构问卷</title>
@@ -114,7 +114,7 @@
     {id:'milk',name:'奶类',icon:'🥛'},
   ];
   const monthly = {
-    '0':'0次', '1':'1次', '2':'2次', '3':'3次', '4':'4次', '5':'5次', '6':'6次', '7plus':'7次及以上',
+    '1':'1次', '2':'2次', '3':'3次', '4':'4次', '5':'5次', '6':'6次', '7plus':'7次及以上',
   };
   const timeBands = {
     under5:'不足5分钟', from5:'5–不足10分钟', from10:'10–不足20分钟',
@@ -171,7 +171,7 @@
   const frequencyOrder = Object.keys(monthly);
   function topChannels(s) {
     return channels.map(({id}) => id)
-      .filter(id => s.channels.includes(id) && own(monthly, s.frequency[id]) && s.frequency[id] !== '0')
+      .filter(id => s.channels.includes(id) && own(monthly, s.frequency[id]))
       .sort((a,b) => frequencyOrder.indexOf(s.frequency[b]) - frequencyOrder.indexOf(s.frequency[a]))
       .slice(0,3);
   }
@@ -330,14 +330,12 @@
     if (step === 3) {
       need(s.profile.role, 'role', '家庭采购角色');
       if (!own(monthly, s.overallFrequency)) add('overallFrequency', '请选择过去7天的生鲜食品购买次数。');
-      else if (s.overallFrequency === '0') add('overallFrequency', '如果过去7天购买了0次，请返回 A1 选择「否，没有购买过」。');
       if (!s.channels.length) add('channels', '请至少选择一个实际购买过的渠道。');
       if (s.channels.includes('other') && !s.otherChannel.trim()) add('otherChannel', '请说明其他渠道。');
       for (const channel of s.channels) {
         const frequency = s.frequency[channel];
         const title = nameOf(channels, channel);
         if (!own(monthly, frequency)) add('freq-' + channel, '请选择' + title + '的购买次数。');
-        else if (frequency === '0') add('freq-' + channel, '如果过去7天在' + title + '购买了0次，请取消勾选该渠道。');
       }
       const ranks = topChannels(s);
       for (const channel of ranks) {
@@ -374,7 +372,6 @@
       if (!own(organicPurchaseOptions, organic.bought)) add('bought', '请选择过去7天认证生鲜购买情况。');
       if (own(purchasedCertificationTypes, organic.bought)) {
         if (!own(monthly, organic.frequency)) add('organicFrequency', '请选择认证生鲜购买次数。');
-        else if (organic.frequency === '0') add('organicFrequency', '如果过去7天购买认证生鲜0次，请在 D1 选择「都没买过」。');
         if (!spendBands('organic').some(({id}) => id === organic.amountBand)) add('organicAmount', '请选择认证生鲜支出区间。');
         requireAllocation('organic-sum', '认证生鲜', organic.channels, organic.shares);
         if (organic.referenceCategory !== 'no-comparison') {
